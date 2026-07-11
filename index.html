@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>宝可梦 宝石 · 极光大陆</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23fff'/><path d='M4 50a46 46 0 0 1 92 0z' fill='%23e94b4b'/><circle cx='50' cy='50' r='46' fill='none' stroke='%23222' stroke-width='6'/><line x1='4' y1='50' x2='96' y2='50' stroke='%23222' stroke-width='6'/><circle cx='50' cy='50' r='13' fill='%23fff' stroke='%23222' stroke-width='6'/></svg>">
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three/build/three.module.js",
+    "three/addons/": "./vendor/three/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app">
+  <canvas id="gl"></canvas>
+
+  <!-- 加载画面 -->
+  <div id="boot" class="boot">
+    <div class="boot-inner">
+      <div class="boot-ball"></div>
+      <div class="boot-title">宝可梦 <span>宝石</span></div>
+      <div class="boot-sub">极光大陆 · AURORA</div>
+      <div class="boot-bar"><div id="bootFill"></div></div>
+      <div id="bootText" class="boot-text">正在唤醒极光大陆…</div>
+    </div>
+  </div>
+
+  <!-- UI 根 -->
+  <div id="title"></div>
+  <div id="hud"></div>
+  <div id="reticle"></div>
+  <div id="dialog"></div>
+  <div id="menu"></div>
+  <div id="battle"></div>
+  <div id="toast"></div>
+  <div id="cine"></div>
+  <div id="net"></div>
+</div>
+<script src="vendor/peerjs.min.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "pokemon-gems-aurora",
+  "private": true,
+  "type": "module",
+  "scripts": { "serve": "python3 -m http.server 8944" },
+  "devDependencies": { "puppeteer-core": "^23.0.0" }
+}
