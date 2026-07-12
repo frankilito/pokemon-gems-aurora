@@ -52,6 +52,8 @@ export class Battle {
       this.enemyActor = this.wildActor;
       this.enemyActor.state = 'battle';
       this.enemyActor.speed = 0;
+      const ep = this.stagePos(1);
+      this.enemyActor.pos.set(ep.x, ep.y, ep.z);
     }
     G.save.seen(this.enemyMon.id);
     G.audio?.cry?.(this.enemyMon.id);
@@ -140,7 +142,7 @@ export class Battle {
     this.camT += dt * .06;
     const d = a.distanceTo(b);
     const side = new THREE.Vector3(b.z - a.z, 0, -(b.x - a.x)).normalize();
-    const R = clamp(d * .68, 4.2, 8.5);
+    const R = clamp(d * .82, 5.2, 10);
     const wob = Math.sin(this.camT) * 1.2;
     const target = mid.clone().addScaledVector(side, R + wob).add(new THREE.Vector3(0, 1.55 + Math.sin(this.camT * .7) * .3, 0));
     const gh = getHeight(target.x, target.z) + .5;

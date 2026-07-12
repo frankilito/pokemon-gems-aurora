@@ -1,14 +1,14 @@
 // NPC：村民/博士/馆主/路人训练家
 import * as THREE from 'three';
 import { G, addUpdate } from '../core/engine.js';
-import { TrainerModel } from '../player/trainerModel.js';
+import { HumanModel } from '../player/humanModel.js';
 import { getHeight, WORLD } from '../world/world.js';
 import { dampAngle } from '../core/math.js';
 
 export class NPC {
   constructor(def) {
     Object.assign(this, def);   // id name x z pal dialog trainer? wander?
-    this.model = new TrainerModel(def.pal ?? {});
+    this.model = new HumanModel({ gender: def.gender ?? 'm', height: def.height ?? (1.6 + ((def.id?.length ?? 0) % 4) * .06), tint: def.tint ?? null });
     this.model.root.position.set(def.x, getHeight(def.x, def.z), def.z);
     this.yaw = def.yaw ?? Math.random() * Math.PI * 2;
     this.home = new THREE.Vector3(def.x, 0, def.z);

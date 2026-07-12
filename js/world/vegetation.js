@@ -10,7 +10,7 @@ const toon = (color, opts = {}) => new THREE.MeshStandardMaterial({ color, rough
 export class GrassField {
   constructor(scene) {
     this.MAX = 22000;
-    this.radius = 58;
+    this.radius = 62;
     const blade = new THREE.PlaneGeometry(.1, 1, 1, 3);
     blade.translate(0, .5, 0);
     const geo = new THREE.InstancedBufferGeometry();
@@ -90,7 +90,7 @@ export class GrassField {
     const R = this.radius;
     let n = 0;
     const cA = new THREE.Color(), cB = new THREE.Color('#d8f591');
-    const step = .88;
+    const step = .8;
     for (let gx = Math.floor((px - R) / step); gx * step < px + R && n < this.MAX; gx++) {
       for (let gz = Math.floor((pz - R) / step); gz * step < pz + R && n < this.MAX; gz++) {
         const h1 = hash2(gx, gz), h2 = hash2(gx, gz, 99), h3 = hash2(gx, gz, 7);
@@ -159,7 +159,7 @@ export class Scatter {
       const inTown = Math.hypot(x - WORLD.town.x, z - WORLD.town.z) < WORLD.town.r * .82;
       if (inTown) {
         if (r1 < .05 && slope < .4) { const sc = .8 + r2 * .4; place(leafPick(), x, h - .06, z, sc, ry); this.world.addCollider(x, z, 1.5 * sc); }
-        else if (r1 < .3) place(flowerPick(), x, h, z, .9 + r2 * .6, ry);
+        else if (r1 < .3) place(flowerPick(), x, h, z, .55 + r2 * .4, ry);
         continue;
       }
       if (b === 'forest') {
@@ -168,7 +168,7 @@ export class Scatter {
           place(leafPick(), x, h - .08, z, sc, ry);
           this.world.addCollider(x, z, 1.6 * sc);
         } else if (r1 < .58) place(items.mushroom, x, h, z, .8 + r2, ry);
-        else if (r1 < .78) place(flowerPick(), x, h, z, .8 + r2, ry);
+        else if (r1 < .78) place(flowerPick(), x, h, z, .5 + r2 * .5, ry);
         else if (r1 < .84) place(items.berry, x, h, z, .9 + r2 * .5, ry);
       } else if (b === 'grass') {
         if (r1 < .05 && slope < .5) {
@@ -178,7 +178,7 @@ export class Scatter {
         }
         else if (r1 < .07 && slope < .5) { const sc = .8 + r2 * .5; place(pinePick(), x, h - .05, z, sc, ry); this.world.addCollider(x, z, 1.2 * sc); }
         else if (r1 < .12) place(items.rock, x, h, z, .4 + r2 * 1.1, ry);
-        else if (r1 < .34) place(flowerPick(), x, h, z, .8 + r2 * .9, ry);
+        else if (r1 < .34) place(flowerPick(), x, h, z, .5 + r2 * .45, ry);
         else if (r1 < .4) place(items.berry, x, h, z, .8 + r2 * .6, ry);
       } else if (b === 'snow' || b === 'temple') {
         if (r1 < .32 && slope < .55 && h < 112) {
@@ -199,7 +199,7 @@ export class Scatter {
           this.world.addCollider(x, z, .8 * sc);
         } else if (r1 < .13) place(items.rock, x, h, z, .35 + r2 * .8, ry);
       } else if (b === 'lake') {
-        if (r1 < .22 && h > 1.2) place(flowerPick(), x, h, z, .9 + r2, ry);
+        if (r1 < .22 && h > 1.2) place(flowerPick(), x, h, z, .55 + r2 * .5, ry);
         else if (r1 < .3 && slope < .5 && h > 1.5) {
           const sc = .75 + r2 * .55;
           place(leafPick(), x, h - .08, z, sc, ry);
@@ -207,7 +207,7 @@ export class Scatter {
         } else if (r1 < .36) place(items.berry, x, h, z, .8 + r2 * .5, ry);
       } else if (b === 'ruins') {
         if (r1 < .12) place(items.rock, x, h, z, .4 + r2 * .9, ry);
-        else if (r1 < .3) place(flowerPick(), x, h, z, .8 + r2, ry);
+        else if (r1 < .3) place(flowerPick(), x, h, z, .5 + r2 * .5, ry);
       }
     }
 

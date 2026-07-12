@@ -288,7 +288,7 @@ function roundBox(w, h, d, r) {
   return g;
 }
 
-function buildGlider() {
+export function buildGlider() {
   const g = new THREE.Group();
   // 伞翼: 弯曲布面
   const seg = 10;

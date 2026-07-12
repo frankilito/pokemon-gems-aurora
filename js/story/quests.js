@@ -39,12 +39,12 @@ export class QuestManager {
     const defs = [
       {
         id: 'prof', name: '青柏博士', x: T.x + 18, z: T.z - 17, yaw: Math.PI,
-        pal: { jacket: '#f2f5fa', jacketLt: '#dce4f0', hair: '#7a8494', noCap: true, noBag: true, pants: '#3a4152' },
+        gender: 'm', height: 1.78, tint: '#e8eef5',
         dialog: () => this.profDialog(),
       },
       {
         id: 'nurse', name: '护士小乔', x: T.x - 2, z: T.z + 15.5, yaw: Math.PI,
-        pal: { jacket: '#ffd9e2', cap: '#fff', hair: '#e88aa0', noBag: true },
+        gender: 'f', height: 1.62, tint: '#ffe0e8',
         dialog: async () => {
           await G.ui.dialog.say('护士小乔', ['欢迎来到宝可梦中心！', '我来帮你的宝可梦恢复健康吧。……好了！']);
           G.save.healAll();
@@ -55,12 +55,12 @@ export class QuestManager {
       },
       {
         id: 'shop', name: '店主阿满', x: T.x - 16, z: T.z - 8.5, yaw: Math.PI,
-        pal: { jacket: '#4f9fd8', hair: '#3a3f4d', noCap: true, noBag: true },
+        gender: 'm', height: 1.72, tint: '#d0e4f5',
         dialog: () => this.shopDialog(),
       },
       {
         id: 'elder', name: '石叟爷爷', x: T.x + 6, z: T.z + 4, wander: true, wanderR: 8,
-        pal: { jacket: '#8a927e', hair: '#d8dde2', noCap: true, noBag: true, pants: '#5a5244' },
+        gender: 'm', height: 1.58, tint: '#d5cfc0',
         dialog: async () => {
           const st = this.q('s_catch5');
           const uniq = G.save.dexCaught.size;
@@ -81,7 +81,7 @@ export class QuestManager {
       },
       {
         id: 'girl', name: '露露', x: T.x - 8, z: T.z + 6, wander: true, wanderR: 10,
-        pal: { jacket: '#ffe27d', hair: '#c26a3a', noCap: true, noBag: true, pants: '#e8556a' },
+        gender: 'f', height: 1.28, tint: '#ffe9c0',
         dialog: async () => {
           const st = this.q('s_pika');
           const has = G.save.party.some(p => p.id === 25) || G.save.box.some(p => p.id === 25);
@@ -102,7 +102,7 @@ export class QuestManager {
       },
       {
         id: 'fisher', name: '渔夫巨浪', x: WORLD.lake.x + 130, z: WORLD.lake.z + 90, yaw: -1.5,
-        pal: { jacket: '#3a6a8a', cap: '#2b4a5f', hair: '#4a3a2a' },
+        gender: 'm', height: 1.76, tint: '#bcd4e8',
         dialog: async () => {
           const st = this.q('s_karp');
           const has = G.save.party.some(p => p.id === 129) || G.save.box.some(p => p.id === 129);
@@ -123,7 +123,7 @@ export class QuestManager {
       },
       {
         id: 'astro', name: '星野博士', x: WORLD.ruins.x + 18, z: WORLD.ruins.z + 30,
-        pal: { jacket: '#4a3a7a', jacketLt: '#8a7ad8', hair: '#2a2a3a', noCap: true },
+        gender: 'm', height: 1.7, tint: '#cfc2f0',
         dialog: async () => {
           const st = this.q('s_ghost');
           const hasGhost = [...G.save.party, ...G.save.box].some(p => p.species.types.includes('ghost'));
@@ -145,21 +145,21 @@ export class QuestManager {
       // 道馆馆主
       {
         id: 'gym_rock', name: '馆主磐岩', x: WORLD.ruins.x - 60, z: WORLD.ruins.z + 67, yaw: Math.PI,
-        pal: { jacket: '#8a7a5a', cap: '#c2ab6e', pants: '#4a4032' },
+        gender: 'm', height: 1.8, tint: '#e0d0a8',
         dialog: () => this.gymDialog('rock', '磐岩', [[74, 12], [95, 14]], 1600,
           ['想要磐石徽章？让我看看你的意志是否坚硬如岩！', '记住：岩石会碎，但意志不会。'],
           ['我的岩壁……被你击穿了！', '这枚「磐石徽章」是你的了。北方雪山的宝石异变，和遗迹的祭坛脱不了关系……']),
       },
       {
         id: 'gym_water', name: '馆主澜心', x: WORLD.lake.x + 120, z: WORLD.lake.z + 67, yaw: Math.PI,
-        pal: { jacket: '#4f8fff', jacketLt: '#bfe3ff', hair: '#3a6a9a', noCap: true },
+        gender: 'f', height: 1.68, tint: '#b8d8ff',
         dialog: () => this.gymDialog('water', '澜心', [[54, 18], [61, 20], [130, 22]], 2600,
           ['镜湖之水，可映人心。敢在浪涛中起舞吗？', '上吧！让水流冲刷出你的真心！'],
           ['多么清澈的胜利……「碧波徽章」属于你。', '湖底最近泛起奇怪的极光……神殿的水晶似乎在苏醒。']),
       },
       {
         id: 'gym_fire', name: '馆主炎督', x: WORLD.volcano.x - 40, z: WORLD.volcano.z + 157, yaw: Math.PI,
-        pal: { jacket: '#d3543c', cap: '#ff8a54', pants: '#5f2a1f' },
+        gender: 'm', height: 1.82, tint: '#ffc0a0',
         dialog: () => this.gymDialog('fire', '炎督', [[58, 26], [78, 28], [126, 30]], 4200,
           ['熔心火山的烈焰即是我的斗志！', '燃起来吧——用你全部的热量！'],
           ['好烈的火焰！你赢得了「熔心徽章」！', '三枚徽章集齐之时，带上祭坛的极光碎片去雪山之巅——神殿会回应你。']),
@@ -167,19 +167,19 @@ export class QuestManager {
       // 路人训练家
       {
         id: 't_bug', name: '捕虫少年阿绿', x: WORLD.forest.x - 120, z: WORLD.forest.z + 130,
-        pal: { jacket: '#9dc134', cap: '#f6f8ff' },
+        gender: 'm', height: 1.42, tint: '#d8f0b0',
         dialog: () => this.routeTrainer('t_bug', '捕虫少年阿绿', [[10, 8], [13, 8]], 300,
           '我的虫宝可梦最强了！要比一场吗？', '呜哇，输了……给你零花钱。'),
       },
       {
         id: 't_short', name: '短裤小子健太', x: T.x + 40, z: T.z - 120,
-        pal: { jacket: '#7dc4ff', pants: '#3a5f8a' },
+        gender: 'm', height: 1.4, tint: '#c8e8ff',
         dialog: () => this.routeTrainer('t_short', '短裤小子健太', [[19, 10], [16, 10]], 400,
           '短裤真凉快！对战也是说来就来！', '好强！这是约定的奖金！'),
       },
       {
         id: 't_hiker', name: '登山男岩五', x: WORLD.volcano.x - 80, z: WORLD.volcano.z + 220,
-        pal: { jacket: '#8a6a4a', cap: '#5f4a32' },
+        gender: 'm', height: 1.85, tint: '#d8c0a0',
         dialog: () => this.routeTrainer('t_hiker', '登山男岩五', [[74, 20], [95, 22]], 900,
           '山就在那里！对战也在这里！哈哈哈！', '败了！不过山还在，明天继续爬！'),
       },

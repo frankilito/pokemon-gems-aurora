@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import { G, addUpdate, emit, on } from '../core/engine.js';
 import { Input } from '../core/input.js';
-import { TrainerModel } from './trainerModel.js';
+import { HumanModel } from './humanModel.js';
 import { getHeight, getSlope, getNormal, getBiome, WORLD, ZONE_NAMES } from '../world/world.js';
 import { clamp, lerp, damp, dampAngle, TAU } from '../core/math.js';
 
@@ -11,7 +11,7 @@ const GRAV = 26, JUMP_V = 9.2;
 
 export class Player {
   constructor(scene, spawn = { x: 6, z: 470 }) {
-    this.model = new TrainerModel();
+    this.model = new HumanModel({ gender: 'm', height: 1.68 });
     scene.add(this.model.root);
     this.pos = new THREE.Vector3(spawn.x, getHeight(spawn.x, spawn.z), spawn.z);
     this.vel = new THREE.Vector3();
@@ -99,6 +99,7 @@ export class Player {
     this.model.update(dt, st, {
       time: G.time, speed: this.speed,
       climbPhase: this.climbPhase, throwT: this.throwT,
+      sneak: this.speed < 4.5 && this.speed > .6,
     });
     this.model.root.position.copy(this.pos);
     this.model.root.rotation.y = this.yaw;

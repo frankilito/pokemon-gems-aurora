@@ -33,7 +33,7 @@ export function initEngine() {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.08;
+  renderer.toneMappingExposure = 1.0;
   renderer.info.autoReset = false; // 手动重置→跨composer各pass统计真实drawcall/三角形
 
   const scene = new THREE.Scene();
@@ -43,12 +43,12 @@ export function initEngine() {
   // 环境光照(让PBR材质有真实反射层次)
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), .04).texture;
-  scene.environmentIntensity = .5;
+  scene.environmentIntensity = .35;
 
   // 后处理: 泛光
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), .32, .65, .85);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), .25, .6, .9);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
 
