@@ -89,7 +89,28 @@ python3 -m http.server 8944
 - 解析式高度场地形 + 顶点色群系渲染，实例化植被
 - GLB 模型（Draco + WebP）按需加载缓存；动画名模糊匹配 + 程序化步态兜底
 - PokeAPI 数据离线烘焙（`tools/fetch_data.py`）；模型批量抓取（`tools/fetch_models.py`）
-- Puppeteer 自动化测试（`tools/shoot.mjs`）
+
+## 🧪 测试与调试
+
+```bash
+# 先启动本地服务(8944), 再执行:
+node tools/shoot.mjs test        # 游戏内57项单元+集成测试(?autotest): 克制表/伤害公式/经验曲线/
+                                 # 能力值/升级进化/捕获率/存档往返/图鉴数据完整性/生成表/无头战斗模拟
+node tools/e2e_battle.mjs        # E2E: 真实DOM驱动一场完整野战(遭遇→选招→击倒→经验→回世界)
+node tools/e2e_capture.mjs       # E2E: 指针锁定→瞄准→投球→摇晃判定→入队/图鉴/存档
+node tools/e2e_save.mjs          # E2E: 存档→刷新页面→位置/队伍/背包/图鉴/时间恢复
+node tools/shoot.mjs shot out.png [query] [waitMs]   # 定点截图 / eval / drive 见文件头
+```
+
+- 游戏内按 **F3**（或 URL 加 `?debug`）开启性能面板：FPS/帧耗时/drawcall/三角形/地形块/草实例/精灵AI状态/JS堆
+- `?dev` 跳过标题直接进入测试局；`?autotest` 跑测试并显示结果浮层
+- 测试也可直接在浏览器打开 `http://localhost:8944/?autotest` 查看
+
+## ⚙️ 设置与无障碍
+
+总菜单(M) → 系统：总音量/音乐/音效/精灵叫声分组音量、镜头灵敏度(30%~200%)、
+减少镜头晃动（晕动症友好：震屏与FOV冲击大幅降低）、界面字体三档缩放。
+设置独立于存档持久化（`localStorage: gem_settings`），导入导出存档不影响个人设置。
 
 ## ⚖️ 声明
 
