@@ -15,6 +15,8 @@
 - 一整块可无缝探索的大陆：**晨风草原 / 翠影森林 / 镜湖水乡 / 沙鸣海滩 / 霜峰雪山 / 熔心火山 / 回声洞窟 / 星陨遗迹 / 极光神殿**
 - 动态昼夜循环（星空/日月/晨昏光照）、天气系统（晴/多云/雨/雷暴 + 雪山局部降雪）
 - 摇曳草地、水面波光、熔岩池、体积感云层、远景山脉
+- **高清角色**：主角与关键 NPC 采用 VRoid **VRM 动漫模型**（发丝弹簧骨物理+眨眼表情+11 状态程序化骨骼驱动），村民采用 ReadyPlayerMe 写实化身 + Mixamo 骨骼动画
+- **贴图化世界**：地形草/岩/雪/沙四通道细节贴图+法线（ambientCG CC0），瓦顶木柱民居、夜晚窗户暖光、纹理草簇
 - **奔跑 / 冲刺 / 跳跃 / 滑翔伞 / 攀爬 / 游泳 / 骑乘**（风速犬陆行 + 拉普拉斯渡水）
 
 ### 🐾 真实图鉴·151 只关都宝可梦
@@ -94,3 +96,5 @@ python3 -m http.server 8944
 本作为**非商业同人致敬作品**。
 Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc. 所有相关名称与形象版权归原权利方所有。
 3D 模型来自社区项目 [Pokemon-3D-api](https://github.com/Pokemon-3D-api/assets)；图鉴数据来自 [PokeAPI](https://pokeapi.co)；叫声与像素图来自 PokeAPI 资源库。
+人物模型：VRoid 官方示例模型（VRM，遵循其使用条例）与 [ReadyPlayerMe](https://readyplayer.me) 化身、Mixamo 动画；VRM 运行时 [@pixiv/three-vrm](https://github.com/pixiv/three-vrm) (MIT)。
+环境贴图来自 [ambientCG](https://ambientcg.com)（CC0）。
