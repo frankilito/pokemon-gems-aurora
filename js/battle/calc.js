@@ -54,6 +54,7 @@ export function calcDamage(atk, def, moveName, weather = 'none', rng = Math.rand
 
   const stab = atk.mon.types.includes(mv.type) ? 1.5 : 1;
   const eff = typeMultiplier(mv.type, def.mon.types);
+  if (eff === 0) return { dmg: 0, crit: false, eff: 0, miss: false, mv, hits: 1 }; // 免疫：完全无效
   const rand = .85 + rng() * .15;
 
   let dmg = (((2 * L / 5 + 2) * P * A / Math.max(1, D)) / 50 + 2);

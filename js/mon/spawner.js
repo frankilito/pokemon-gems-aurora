@@ -8,7 +8,7 @@ import { clamp, TAU } from '../core/math.js';
 
 // d=白天 n=夜晚 r=雨天加成 herd=群落 rare权重低
 // 每群系: [id, 权重, 最低lv, 最高lv, 标记]
-const TABLES = {
+export const TABLES = {
   grass: [
     [16, 30, 2, 7, 'd,herd'], [19, 30, 2, 7, 'herd'], [10, 18, 2, 5, 'd'], [13, 14, 2, 5, 'd'],
     [21, 16, 3, 8, ''], [29, 12, 4, 9, ''], [32, 12, 4, 9, ''], [43, 14, 4, 9, 'n'],
@@ -63,7 +63,7 @@ const TABLES = {
   town: [[16, 10, 2, 4, 'd,herd'], [19, 10, 2, 4, ''], [52, 6, 3, 5, 'n']],
 };
 // 传说驻守 [id, x, z, lv, 条件flag]
-const LEGENDS = [
+export const LEGENDS = [
   [144, WORLD.mountain.x - 40, WORLD.mountain.z - 30, 50, 'articuno'],
   [146, WORLD.volcano.x + 8, WORLD.volcano.z + 40, 50, 'moltres'],
   [145, WORLD.ruins.x + 20, WORLD.ruins.z - 25, 50, 'zapdos'],   // 雷雨时出现
@@ -78,7 +78,7 @@ export class Spawner {
     this.actors = new Set();
     this.legendActors = new Map();
     this.tick = 0;
-    this.target = 16;
+    this.target = 24;
     addUpdate(dt => this.update(dt));
   }
 
@@ -89,24 +89,32 @@ export class Spawner {
 
     this.tick -= dt;
     if (this.tick > 0) return;
-    this.tick = 1.2;
+    this.tick = .7;
 
     const P = G.player.pos;
     // 清理远处
     for (const a of [...this.actors]) {
       const d = Math.hypot(a.pos.x - P.x, a.pos.z - P.z);
-      if (d > 130 || a.dead) { a.dispose(this.scene); this.actors.delete(a); }
+      if (d > 100 || a.dead) { a.dispose(this.scene); this.actors.delete(a); }
     }
-    // 补充
-    if (this.actors.size < this.target && G.state === 'roam') this.trySpawn();
+    // 补充(欠额越多补越快)
+    if (G.state === 'roam') {
+      const deficit = this.target - this.actors.size;
+      for (let i = 0; i < Math.min(3, deficit); i++) this.trySpawn();
+    }
     // 传说
     this.updateLegends();
   }
 
   trySpawn() {
     const P = G.player.pos;
-    const ang = Math.random() * TAU;
-    const r = 40 + Math.random() * 55;
+    // 60% 偏向镜头前方(玩家能看见), 40% 全向
+    let ang;
+    if (G.cam && Math.random() < .6) {
+      const w = G.cam.yaw + Math.PI;   // 玩家前方向(yaw空间: x=sin,z=cos)
+      ang = Math.atan2(Math.cos(w), Math.sin(w)) + (Math.random() - .5) * 2.1;
+    } else ang = Math.random() * TAU;
+    const r = 14 + Math.random() * 42;
     const x = P.x + Math.cos(ang) * r, z = P.z + Math.sin(ang) * r;
     const biome = getBiome(x, z);
     const table = TABLES[biome];

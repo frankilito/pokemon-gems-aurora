@@ -3,11 +3,12 @@ import * as THREE from 'three';
 import { G, emit, addUpdate, removeUpdate } from '../core/engine.js';
 import { MonActor } from '../mon/monActor.js';
 import { Fighter, calcDamage, EFF_TEXT, aiPick, STAGE_MULT } from './calc.js';
+import { captureOdds } from './capture.js';
 import { moveData, expYield, Pokemon, speciesOf } from '../mon/pokemon.js';
 import { FX, buildBall } from '../core/fx.js';
 import { getHeight } from '../world/world.js';
 import { ITEMS } from '../core/state.js';
-import { AILMENT_ZH, TYPE_ZH } from '../mon/types.js';
+import { AILMENT_ZH, TYPE_ZH, typeMultiplier } from '../mon/types.js';
 import { clamp, lerp, damp, TAU } from '../core/math.js';
 
 const TYPE_COLORS = {
@@ -252,19 +253,19 @@ export class Battle {
       const et = EFF_TEXT(res.eff);
       if (et) await ui.msg(et);
       // 吸血/反伤
-      if (mv.drain > 0) {
+      if (mv.drain > 0 && res.dmg > 0) {
         const heal = Math.max(1, Math.floor(res.dmg * mv.drain / 100));
         atk.mon.hp = Math.min(atk.mon.maxHp, atk.mon.hp + heal);
         await ui.msg(`${mon.name} 吸取了体力！`);
         ui.updateBars();
-      } else if (mv.drain < 0) {
+      } else if (mv.drain < 0 && res.dmg > 0) {
         const rec = Math.max(1, Math.floor(res.dmg * -mv.drain / 100));
         atk.mon.hp = Math.max(0, atk.mon.hp - rec);
         await ui.msg(`${mon.name} 受到了反作用伤害！`);
         ui.updateBars();
       }
       // 畏缩
-      if (mv.flinch > 0 && Math.random() * 100 < mv.flinch) def.flinched = true;
+      if (mv.flinch > 0 && res.dmg > 0 && Math.random() * 100 < mv.flinch) def.flinched = true;
     } else {
       // 变化技: 治疗
       if (mv.healing > 0) {
@@ -279,7 +280,10 @@ export class Battle {
     // 异常状态
     if (mv.ailment && mv.ailment !== 'none') {
       const chance = mv.ailmentChance || (mv.class === 'status' ? 100 : 0);
-      if (chance > 0 && Math.random() * 100 < chance) await this.applyAilment(def, defActor, mv.ailment);
+      // 电磁波等电系变化技对地面系无效（属性免疫）
+      if (mv.class === 'status' && typeMultiplier(mv.type, def.mon.types) === 0) {
+        await ui.msg('似乎没有效果…');
+      } else if (chance > 0 && Math.random() * 100 < chance) await this.applyAilment(def, defActor, mv.ailment);
     }
     // 能力变化
     if (mv.statChanges.length) {
@@ -470,15 +474,9 @@ export class Battle {
       ball.position.lerpVectors(to, rest, t);
     }, .35);
 
-    // 公式(战斗内: 用实际HP+状态)
-    const M = mon.maxHp, H = Math.max(1, mon.hp);
-    const rate = mon.catchRate;
-    const ballB = ITEMS[ballKind]?.rate ?? 1;
-    const statusB = mon.status === 'sleep' || mon.status === 'freeze' ? 2 : mon.status ? 1.5 : 1;
-    let a = ((3 * M - 2 * H) / (3 * M)) * rate * ballB * statusB;
-    if (mon.species.legendary) a *= .7;
-    a = clamp(a, 1, 255);
-    const catchIt = a >= 255 || Math.random() < Math.pow(a / 255, .68);
+    // 公式(战斗内: 用实际HP+状态; 战斗语境更宽松的调参)
+    const { a, p } = captureOdds(mon, ballKind, { legendMod: .7, pow: .68 });
+    const catchIt = a >= 255 || Math.random() < p;
     const shakes = catchIt ? 3 : (a > 150 ? 2 : a > 60 ? 1 : 0);
     for (let i = 0; i < (catchIt ? 3 : shakes); i++) {
       G.audio?.sfx?.('shake');

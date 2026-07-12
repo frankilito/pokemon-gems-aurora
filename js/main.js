@@ -71,6 +71,11 @@ async function boot() {
   console.log('[game] booted');
 
   const q = G.debug;
+  if (q.has('autotest')) {
+    const { runTests } = await import('./tests/autotest.js');
+    await runTests();
+    return;
+  }
   if (q.has('spectate')) { startSpectator(); return; }
   if (q.has('dev') || q.has('skiptitle')) {
     startGame(GameState.hasSave() && !q.has('dev') ? GameState.load() : null);

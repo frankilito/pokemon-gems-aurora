@@ -9,6 +9,21 @@ import { clamp, TAU } from '../core/math.js';
 
 const BALL_KINDS = ['poke-ball', 'great-ball', 'ultra-ball', 'heavy-ball'];
 
+// 捕获率纯函数 (Gen3/4 公式 + 背刺/树果/传说修正)
+// bonus: {behind, eating, legendMod=.65, pow=.75} — 战斗内捕捉传入更宽松的调参
+// 返回 {a: 修正捕获值(1..255), p: 成功概率(0..1]}
+export function captureOdds(mon, ballKind, bonus = {}) {
+  const M = mon.maxHp, H = Math.max(1, mon.hp);
+  const rate = mon.catchRate;
+  const ballB = (ITEMS[ballKind]?.rate ?? 1) * (bonus.behind ? (ITEMS[ballKind]?.sneak ?? 1.35) : 1) * (bonus.eating ? 1.7 : 1);
+  const statusB = mon.status === 'sleep' || mon.status === 'freeze' ? 2 : mon.status ? 1.5 : 1;
+  let a = ((3 * M - 2 * H) / (3 * M)) * rate * ballB * statusB;
+  if (mon.species.legendary) a *= (bonus.legendMod ?? .65);
+  a = clamp(a, 1, 255);
+  const powK = bonus.pow ?? .75; // 幂<1 平滑体验
+  return { a, p: a >= 255 ? 1 : Math.pow(a / 255, powK) };
+}
+
 export class CaptureSystem {
   constructor(scene) {
     this.scene = scene;
@@ -224,15 +239,8 @@ export class CaptureSystem {
 
   shakePhase(ball, actor, ballKind, bonus) {
     const mon = actor.mon;
-    // Gen3/4 公式 (野外满HP; 战斗削弱由 battle 传入 hpRatio)
-    const M = mon.maxHp, H = Math.max(1, mon.hp);
-    const rate = mon.catchRate;
-    const ballB = (ITEMS[ballKind]?.rate ?? 1) * (bonus.behind ? (ITEMS[ballKind]?.sneak ?? 1.35) : 1) * (bonus.eating ? 1.7 : 1);
-    const statusB = mon.status === 'sleep' || mon.status === 'freeze' ? 2 : mon.status ? 1.5 : 1;
-    let a = ((3 * M - 2 * H) / (3 * M)) * rate * ballB * statusB;
-    if (mon.species.legendary) a *= .65;
-    a = clamp(a, 1, 255);
-    const catchIt = a >= 255 || Math.random() < Math.pow(a / 255, .75); // 平滑体验
+    const { a, p } = captureOdds(mon, ballKind, bonus);
+    const catchIt = a >= 255 || Math.random() < p;
     const shakes = catchIt ? 3 : (a > 150 ? 2 : a > 60 ? 1 : Math.random() < .5 ? 1 : 0);
 
     let count = 0;
