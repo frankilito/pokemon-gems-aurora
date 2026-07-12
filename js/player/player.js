@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { G, addUpdate, emit, on } from '../core/engine.js';
 import { Input } from '../core/input.js';
 import { HumanModel } from './humanModel.js';
+import { CharacterModel } from './characterModel.js';
 import { getHeight, getSlope, getNormal, getBiome, WORLD, ZONE_NAMES } from '../world/world.js';
 import { clamp, lerp, damp, dampAngle, TAU } from '../core/math.js';
 
@@ -11,7 +12,7 @@ const GRAV = 26, JUMP_V = 9.2;
 
 export class Player {
   constructor(scene, spawn = { x: 6, z: 470 }) {
-    this.model = new HumanModel({ gender: 'm', height: 1.68 });
+    this.model = new CharacterModel({ vrm: 'player_m', height: 1.62 });   // VRM 高清主角(程序化兜底)
     scene.add(this.model.root);
     this.pos = new THREE.Vector3(spawn.x, getHeight(spawn.x, spawn.z), spawn.z);
     this.vel = new THREE.Vector3();
