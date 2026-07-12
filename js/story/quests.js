@@ -43,7 +43,7 @@ export class QuestManager {
         dialog: () => this.profDialog(),
       },
       {
-        id: 'nurse', name: '护士小乔', x: T.x - 2, z: T.z + 15.5, yaw: Math.PI,
+        id: 'nurse', name: '护士小乔', vrm: 'nurse', x: T.x - 2, z: T.z + 15.5, yaw: Math.PI,
         gender: 'f', height: 1.62, tint: '#ffe0e8',
         dialog: async () => {
           await G.ui.dialog.say('护士小乔', ['欢迎来到宝可梦中心！', '我来帮你的宝可梦恢复健康吧。……好了！']);
@@ -80,7 +80,7 @@ export class QuestManager {
         },
       },
       {
-        id: 'girl', name: '露露', x: T.x - 8, z: T.z + 6, wander: true, wanderR: 10,
+        id: 'girl', name: '露露', vrm: 'npc_f1', height: 1.42, x: T.x - 8, z: T.z + 6, wander: true, wanderR: 10,
         gender: 'f', height: 1.28, tint: '#ffe9c0',
         dialog: async () => {
           const st = this.q('s_pika');
@@ -122,7 +122,7 @@ export class QuestManager {
         },
       },
       {
-        id: 'astro', name: '星野博士', x: WORLD.ruins.x + 18, z: WORLD.ruins.z + 30,
+        id: 'astro', name: '星野博士', vrm: 'professor', x: WORLD.ruins.x + 18, z: WORLD.ruins.z + 30,
         gender: 'm', height: 1.7, tint: '#cfc2f0',
         dialog: async () => {
           const st = this.q('s_ghost');
@@ -151,7 +151,7 @@ export class QuestManager {
           ['我的岩壁……被你击穿了！', '这枚「磐石徽章」是你的了。北方雪山的宝石异变，和遗迹的祭坛脱不了关系……']),
       },
       {
-        id: 'gym_water', name: '馆主澜心', x: WORLD.lake.x + 120, z: WORLD.lake.z + 67, yaw: Math.PI,
+        id: 'gym_water', name: '馆主澜心', vrm: 'npc_f2', x: WORLD.lake.x + 120, z: WORLD.lake.z + 67, yaw: Math.PI,
         gender: 'f', height: 1.68, tint: '#b8d8ff',
         dialog: () => this.gymDialog('water', '澜心', [[54, 18], [61, 20], [130, 22]], 2600,
           ['镜湖之水，可映人心。敢在浪涛中起舞吗？', '上吧！让水流冲刷出你的真心！'],

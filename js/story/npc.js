@@ -2,13 +2,16 @@
 import * as THREE from 'three';
 import { G, addUpdate } from '../core/engine.js';
 import { HumanModel } from '../player/humanModel.js';
+import { CharacterModel } from '../player/characterModel.js';
 import { getHeight, WORLD } from '../world/world.js';
 import { dampAngle } from '../core/math.js';
 
 export class NPC {
   constructor(def) {
     Object.assign(this, def);   // id name x z pal dialog trainer? wander?
-    this.model = new HumanModel({ gender: def.gender ?? 'm', height: def.height ?? (1.6 + ((def.id?.length ?? 0) % 4) * .06), tint: def.tint ?? null });
+    this.model = def.vrm
+      ? new CharacterModel({ vrm: def.vrm, height: def.height ?? 1.6 })   // 关键角色: VRM高清
+      : new HumanModel({ gender: def.gender ?? 'm', height: def.height ?? (1.6 + ((def.id?.length ?? 0) % 4) * .06), tint: def.tint ?? null });
     this.model.root.position.set(def.x, getHeight(def.x, def.z), def.z);
     this.yaw = def.yaw ?? Math.random() * Math.PI * 2;
     this.home = new THREE.Vector3(def.x, 0, def.z);

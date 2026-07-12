@@ -161,11 +161,11 @@ export function makeHouse(opts = {}) {
   const mkWin = (x, z, ry = 0) => {
     const win = new THREE.Group();
     const frame = new THREE.Mesh(new THREE.BoxGeometry(.96, .86, .14), woodM);
-    const glass = new THREE.Mesh(new THREE.BoxGeometry(.78, .68, .06), Mts.glass());
-    glass.position.z = .03;
+    const glass = new THREE.Mesh(new THREE.BoxGeometry(.78, .68, .05), Mts.glass());
+    glass.position.z = .085;
     GLASS_POOL.push(glass.material);
-    const bar1 = new THREE.Mesh(new THREE.BoxGeometry(.05, .7, .08), woodM); bar1.position.z = .05;
-    const bar2 = new THREE.Mesh(new THREE.BoxGeometry(.8, .05, .08), woodM); bar2.position.z = .05;
+    const bar1 = new THREE.Mesh(new THREE.BoxGeometry(.05, .7, .05), woodM); bar1.position.z = .11;
+    const bar2 = new THREE.Mesh(new THREE.BoxGeometry(.8, .05, .05), woodM); bar2.position.z = .11;
     const sill = new THREE.Mesh(new THREE.BoxGeometry(1.06, .1, .24), woodM); sill.position.y = -.48;
     win.add(frame, glass, bar1, bar2, sill);
     win.position.set(x, 1.72, z);
