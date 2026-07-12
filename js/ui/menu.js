@@ -3,6 +3,7 @@ import { G, on, emit } from '../core/engine.js';
 import { Input } from '../core/input.js';
 import { spritePath, artPath, cryPath } from '../core/assets.js';
 import { ITEMS } from '../core/state.js';
+import { Settings } from '../core/settings.js';
 import { TYPE_ZH, AILMENT_ZH, STAT_ZH } from '../mon/types.js';
 import { moveData, speciesOf } from '../mon/pokemon.js';
 import { WORLD, ZONE_NAMES, getBiome, getHeight } from '../world/world.js';
@@ -276,6 +277,8 @@ export class Menu {
 
   // ---------- 系统 ----------
   renderSys(body) {
+    const S = G.settings ?? {};
+    const pct = v => Math.round((v ?? 0) * 100);
     body.innerHTML = `
       <div class="sys-grid">
         <button class="btn big" id="sysSave">💾 保存进度</button>
@@ -285,9 +288,28 @@ export class Menu {
         <div class="sys-row">昼夜速度
           <select id="sysDay"><option value="1320">标准(22分钟/天)</option><option value="600">快(10分钟)</option><option value="120">极快(2分钟)</option><option value="0">暂停时间</option></select>
         </div>
-        <div class="sys-row">音乐音量 <input type="range" id="sysBgm" min="0" max="100" value="${Math.round((G.audio?.bgmVol ?? .5) * 100)}"></div>
+        <div class="sys-row">总音量 <input type="range" id="setMaster" min="0" max="100" value="${pct(S.master ?? .9)}"></div>
+        <div class="sys-row">音乐 <input type="range" id="setBgm" min="0" max="100" value="${pct(S.bgm ?? .45)}"></div>
+        <div class="sys-row">音效 <input type="range" id="setSfx" min="0" max="100" value="${pct(S.sfx ?? .7)}"></div>
+        <div class="sys-row">精灵叫声 <input type="range" id="setCry" min="0" max="100" value="${pct(S.cry ?? 1)}"></div>
+        <div class="sys-row">镜头灵敏度 <input type="range" id="setSens" min="30" max="200" value="${Math.round((S.sens ?? 1) * 100)}"></div>
+        <div class="sys-row">减少镜头晃动 <input type="checkbox" id="setMotion" ${S.reduceMotion ? 'checked' : ''}></div>
+        <div class="sys-row">界面字体
+          <select id="setFont">
+            <option value="1" ${(S.fontScale ?? 1) === 1 ? 'selected' : ''}>标准</option>
+            <option value="1.15" ${S.fontScale === 1.15 ? 'selected' : ''}>大</option>
+            <option value="1.3" ${S.fontScale === 1.3 ? 'selected' : ''}>特大</option>
+          </select>
+        </div>
         <div class="sys-row">玩家: ${G.save.name} · 游玩 ${Math.floor(G.save.playTime / 60)} 分钟 · 徽章 ${G.save.badges.length}</div>
       </div>`;
+    const bind = (id, key, div = 100) => {
+      body.querySelector(id).oninput = e => Settings.set(key, +e.target.value / div);
+    };
+    bind('#setMaster', 'master'); bind('#setBgm', 'bgm'); bind('#setSfx', 'sfx');
+    bind('#setCry', 'cry'); bind('#setSens', 'sens');
+    body.querySelector('#setMotion').onchange = e => Settings.set('reduceMotion', e.target.checked);
+    body.querySelector('#setFont').onchange = e => Settings.set('fontScale', +e.target.value);
     body.querySelector('#sysSave').onclick = () => { G.save.save(); emit('toast', { text: '✅ 已保存' }); };
     body.querySelector('#sysExport').onclick = () => {
       const data = JSON.stringify(G.save.save());
@@ -312,6 +334,5 @@ export class Menu {
       if (v === 0) G.sky.paused = true;
       else { G.sky.paused = false; G.sky.dayLength = v; }
     };
-    body.querySelector('#sysBgm').oninput = e => G.audio?.setBgmVol?.(+e.target.value / 100);
   }
 }

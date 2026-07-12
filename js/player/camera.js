@@ -24,8 +24,9 @@ export class ThirdPersonCam {
     if (!P || G.state === 'battle' || G.state === 'cine') return;
 
     if (Input.locked && G.state === 'roam') {
-      this.yaw -= Input.mouse.dx * .0021;
-      this.pitch = clamp(this.pitch + Input.mouse.dy * .0019, -.55, 1.2);
+      const sens = G.settings?.sens ?? 1;
+      this.yaw -= Input.mouse.dx * .0021 * sens;
+      this.pitch = clamp(this.pitch + Input.mouse.dy * .0019 * sens, -.55, 1.2);
       this.wishDist = clamp(this.wishDist + Input.mouse.wheel * .7, 2.6, 10);
     }
 
@@ -64,11 +65,15 @@ export class ThirdPersonCam {
     G.camera.lookAt(this.lookAt);
 
     // 冲刺 FOV
-    const wantKick = P.state === 'sprint' ? 6 : (P.state === 'glide' ? 4 : 0);
+    const motionK = G.settings?.reduceMotion ? .35 : 1;
+    const wantKick = (P.state === 'sprint' ? 6 : (P.state === 'glide' ? 4 : 0)) * motionK;
     this.fovKick = damp(this.fovKick, wantKick, 5, dt);
     const fov = (this.aim ? 44 : 55) + this.fovKick;
     if (Math.abs(G.camera.fov - fov) > .1) { G.camera.fov = lerp(G.camera.fov, fov, .2); G.camera.updateProjectionMatrix(); }
   }
 
-  kick(amount = .6) { this.shake = Math.min(1.2, this.shake + amount); }
+  kick(amount = .6) {
+    if (G.settings?.reduceMotion) amount *= .25;
+    this.shake = Math.min(1.2, this.shake + amount);
+  }
 }

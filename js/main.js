@@ -14,6 +14,7 @@ import { MountSystem } from './player/mount.js';
 import { Spawner } from './mon/spawner.js';
 import { FX } from './core/fx.js';
 import { GameState } from './core/state.js';
+import { Settings } from './core/settings.js';
 import { CaptureSystem } from './battle/capture.js';
 import { Pokemon } from './mon/pokemon.js';
 import { Battle } from './battle/battle.js';
@@ -34,6 +35,7 @@ const bootFill = p => { const el = document.getElementById('bootFill'); if (el) 
 async function boot() {
   initEngine();
   Input.init();
+  Settings.load();
   window.__game = { started: false };
 
   bootText('读取图鉴数据…'); bootFill(.08);

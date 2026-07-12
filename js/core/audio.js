@@ -80,12 +80,23 @@ export class AudioSys {
     this.echo = ctx.createDelay(.6); this.echo.delayTime.value = .27;
     const eg = ctx.createGain(); eg.gain.value = .18;
     this.echo.connect(eg); eg.connect(this.bgmGain);
+    this.applyVolumes();
     // 调度器
     setInterval(() => this.schedule(), 80);
     if (!this.theme) this.bgm('field');
   }
 
   setBgmVol(v) { this.bgmVol = v; if (this.bgmGain) this.bgmGain.gain.value = v; }
+
+  // 从全局设置同步各分组音量
+  applyVolumes() {
+    const s = G.settings; if (!s) return;
+    this.bgmVol = s.bgm ?? this.bgmVol;
+    this.sfxVol = s.sfx ?? this.sfxVol;
+    if (this.master) this.master.gain.value = s.master ?? .9;
+    if (this.bgmGain) this.bgmGain.gain.value = this.bgmVol;
+    if (this.sfxGain) this.sfxGain.gain.value = this.sfxVol;
+  }
 
   bgm(name) {
     if (this.theme === name) return;
@@ -223,7 +234,8 @@ export class AudioSys {
     try {
       let a = this.cries.get(id);
       if (!a) { a = new Audio(cryPath(id)); this.cries.set(id, a); }
-      a.volume = vol;
+      const mul = (G.settings?.cry ?? 1) * (G.settings?.master ?? .9) / .9;
+      a.volume = Math.max(0, Math.min(1, vol * mul));
       a.currentTime = 0;
       a.play().catch(() => {});
     } catch (e) {}
