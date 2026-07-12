@@ -121,6 +121,11 @@ export function applyTerrainDetail(mat) {
           vec3 detail = mix(vec3(luma * 1.9), det * 2.2, .38);
           diffuseColor.rgb *= mix(vec3(1.0), detail, .62 * detailFade);
         }
+        {
+          // 饱和度找回(抵消强环境光洗白)
+          float l2 = dot(diffuseColor.rgb, vec3(.299, .587, .114));
+          diffuseColor.rgb = clamp(mix(vec3(l2), diffuseColor.rgb, 1.24), 0.0, 1.0);
+        }
       }`)
       // 法线扰动(导数切线系, 无需 tangent attribute)
       .replace('#include <normal_fragment_maps>', `

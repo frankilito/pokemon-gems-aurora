@@ -7,14 +7,67 @@ import { hash2, mulberry32, clamp, Noise2D } from '../core/math.js';
 const toon = (color, opts = {}) => new THREE.MeshStandardMaterial({ color, roughness: .92, metalness: 0, ...opts });
 
 // ============ 摇曳草 ============
+// 程序化草叶簇纹理(alpha)
+function makeGrassBladeTex() {
+  const S = 256, c = document.createElement('canvas');
+  c.width = S; c.height = S;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, S, S);
+  const N = 11;
+  for (let i = 0; i < N; i++) {
+    const bx = (i + .5) / N * S + (Math.random() - .5) * 14;
+    const w = 7 + Math.random() * 9;
+    const hgt = S * (.55 + Math.random() * .45);
+    const lean = (Math.random() - .5) * 40;
+    const g = ctx.createLinearGradient(0, S, 0, S - hgt);
+    const l = .72 + Math.random() * .45;
+    g.addColorStop(0, `rgba(${86*l|0},${132*l|0},${58*l|0},1)`);
+    g.addColorStop(1, `rgba(${150*l|0},${208*l|0},${96*l|0},1)`);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(bx - w / 2, S);
+    ctx.quadraticCurveTo(bx - w * .3 + lean * .4, S - hgt * .6, bx + lean, S - hgt);
+    ctx.quadraticCurveTo(bx + w * .3 + lean * .4, S - hgt * .6, bx + w / 2, S);
+    ctx.closePath();
+    ctx.fill();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
+  return t;
+}
+
 export class GrassField {
   constructor(scene) {
     this.MAX = 22000;
     this.radius = 62;
-    const blade = new THREE.PlaneGeometry(.1, 1, 1, 3);
-    blade.translate(0, .5, 0);
+    // 三向交叉面片草簇(纹理承载叶形)
+    const tuft = (() => {
+      const parts = [];
+      for (let i = 0; i < 3; i++) {
+        const q = new THREE.PlaneGeometry(.72, 1, 1, 2);
+        q.translate(0, .5, 0);
+        q.rotateY(i * Math.PI / 3);
+        parts.push(q);
+      }
+      const total = parts.reduce((n, g) => n + g.attributes.position.count, 0);
+      const pos = new Float32Array(total * 3), uv = new Float32Array(total * 2);
+      const idx = [];
+      let vo = 0;
+      for (const g of parts) {
+        pos.set(g.attributes.position.array, vo * 3);
+        uv.set(g.attributes.uv.array, vo * 2);
+        for (let i = 0; i < g.index.count; i++) idx.push(g.index.array[i] + vo);
+        vo += g.attributes.position.count;
+      }
+      const out = new THREE.BufferGeometry();
+      out.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      out.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+      out.setIndex(idx);
+      return out;
+    })();
     const geo = new THREE.InstancedBufferGeometry();
-    geo.index = blade.index; geo.attributes.position = blade.attributes.position; geo.attributes.uv = blade.attributes.uv;
+    geo.index = tuft.index; geo.attributes.position = tuft.attributes.position; geo.attributes.uv = tuft.attributes.uv;
     const offs = new Float32Array(this.MAX * 3), scl = new Float32Array(this.MAX), rot = new Float32Array(this.MAX), ph = new Float32Array(this.MAX), col = new Float32Array(this.MAX * 3);
     geo.setAttribute('iOff', new THREE.InstancedBufferAttribute(offs, 3));
     geo.setAttribute('iScale', new THREE.InstancedBufferAttribute(scl, 1));
@@ -30,6 +83,7 @@ export class GrassField {
         uTime: { value: 0 },
         uPlayer: { value: new THREE.Vector3() },
         uSunI: { value: 1 },
+        uTex: { value: makeGrassBladeTex() },
       },
     ]);
     const mat = new THREE.ShaderMaterial({
@@ -38,12 +92,12 @@ export class GrassField {
         #include <fog_pars_vertex>
         attribute vec3 iOff; attribute float iScale; attribute float iRot; attribute float iPhase; attribute vec3 iCol;
         uniform float uTime; uniform vec3 uPlayer;
-        varying vec3 vCol; varying float vTip;
+        varying vec3 vCol; varying float vTip; varying vec2 vUv;
         void main(){
           vTip = uv.y;
+          vUv = uv;
           float c = cos(iRot), s = sin(iRot);
           vec3 p = position;
-          p.x *= (1.0 - uv.y * 0.72);   // 叶尖收窄
           p.xz = mat2(c,-s,s,c) * p.xz;
           p *= iScale;
           float bendT = vTip * vTip;
@@ -64,9 +118,12 @@ export class GrassField {
         }`,
       fragmentShader: `
         #include <fog_pars_fragment>
-        varying vec3 vCol; varying float vTip; uniform float uSunI;
+        varying vec3 vCol; varying float vTip; varying vec2 vUv;
+        uniform float uSunI; uniform sampler2D uTex;
         void main(){
-          vec3 col = vCol * (0.55 + vTip*0.55) * uSunI;
+          vec4 tx = texture2D(uTex, vUv);
+          if (tx.a < 0.42) discard;
+          vec3 col = vCol * mix(vec3(1.0), tx.rgb * 1.35, .5) * (0.52 + vTip*0.55) * uSunI;
           gl_FragColor = vec4(col, 1.0);
           #include <fog_fragment>
         }`,
@@ -90,7 +147,7 @@ export class GrassField {
     const R = this.radius;
     let n = 0;
     const cA = new THREE.Color(), cB = new THREE.Color('#d8f591');
-    const step = .8;
+    const step = 1.0;
     for (let gx = Math.floor((px - R) / step); gx * step < px + R && n < this.MAX; gx++) {
       for (let gz = Math.floor((pz - R) / step); gz * step < pz + R && n < this.MAX; gz++) {
         const h1 = hash2(gx, gz), h2 = hash2(gx, gz, 99), h3 = hash2(gx, gz, 7);
@@ -110,7 +167,7 @@ export class GrassField {
         const h = getHeight(x, z);
         if (h < .4 || getSlope(x, z) > .75) continue;
         offs[n * 3] = x; offs[n * 3 + 1] = h - .04; offs[n * 3 + 2] = z;
-        scl[n] = .3 + h1 * .38;
+        scl[n] = .5 + h1 * .55;
         rot[n] = h2 * Math.PI * 2;
         ph[n] = h3 * 10;
         cA.set(base).offsetHSL((h1 - .5) * .05, 0, (h2 - .5) * .1).lerp(cB, h3 * .3);

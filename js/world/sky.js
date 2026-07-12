@@ -176,7 +176,7 @@ export class Sky {
     this.moonL.intensity = night * .32;
     this.moonL.position.copy(anchor).addScaledVector(moonDir, 200);
     this.moonL.target.position.copy(anchor);
-    this.hemi.intensity = lerp(.14, .8, Math.max(sunI, night * .12)) * dim;
+    this.hemi.intensity = lerp(.12, .52, Math.max(sunI, night * .12)) * dim;   // env光照已提供填充, 防洗白
     this.hemi.color.copy(cs.top).lerp(new THREE.Color('#ffffff'), .5);
     this.hemi.groundColor.set(night > .5 ? '#26314e' : '#8a9a6a');
 
