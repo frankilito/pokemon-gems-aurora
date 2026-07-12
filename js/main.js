@@ -22,6 +22,7 @@ import { HUD } from './ui/hud.js';
 import { Dialog } from './ui/dialog.js';
 import { Menu } from './ui/menu.js';
 import { Title } from './ui/title.js';
+import { DebugPanel } from './ui/debugPanel.js';
 import { QuestManager } from './story/quests.js';
 import { AudioSys } from './core/audio.js';
 import { Net } from './net/net.js';
@@ -60,6 +61,7 @@ async function boot() {
   G.ui.battle = new BattleUI();
   G.ui.menu = new Menu();
   G.ui.hud = new HUD();
+  G.ui.debugPanel = new DebugPanel();
   G.net = new Net();
 
   setupToasts();

@@ -34,6 +34,7 @@ export function initEngine() {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.08;
+  renderer.info.autoReset = false; // 手动重置→跨composer各pass统计真实drawcall/三角形
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, .1, 4000);
@@ -72,6 +73,7 @@ export function initEngine() {
         if (!errOnce.has(fn)) { errOnce.add(fn); console.error('[engine] updater error', e); }
       }
     }
+    renderer.info.reset(); // updater读完上一帧统计后再重置, composer各pass在下面累积
     try { composer.render(); } catch (e) {
       if (!errOnce.has(composer)) { errOnce.add(composer); console.error('[engine] render error, 回退直渲', e); }
       renderer.render(scene, camera);
