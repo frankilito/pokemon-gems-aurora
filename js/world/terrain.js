@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { Noise2D, clamp, lerp, smoothstep, hash2 } from '../core/math.js';
 import { G } from '../core/engine.js';
+import { computeSplat, applyTerrainDetail } from './terrainDetail.js';
 
 const SEED = 20260711;
 const n1 = new Noise2D(SEED), n2 = new Noise2D(SEED + 7), n3 = new Noise2D(SEED + 21), n4 = new Noise2D(SEED + 40);
@@ -220,20 +221,26 @@ export class Terrain {
     const size = WORLD.size / CH; // 每块尺寸
     const SEG = 64;
     const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .94, metalness: 0, flatShading: false });
+    applyTerrainDetail(mat);   // 细节贴图: 草/岩/雪/沙 splat + 法线
     for (let cz = 0; cz < CH; cz++) for (let cx = 0; cx < CH; cx++) {
       const ox = (cx - CH / 2 + .5) * size, oz = (cz - CH / 2 + .5) * size;
       const geo = new THREE.PlaneGeometry(size, size, SEG, SEG);
       geo.rotateX(-Math.PI / 2);
       const pos = geo.attributes.position;
       const colors = new Float32Array(pos.count * 3);
+      const splats = new Float32Array(pos.count * 4);
+      const sp4 = [0, 0, 0, 0];
       for (let i = 0; i < pos.count; i++) {
         const x = pos.getX(i) + ox, z = pos.getZ(i) + oz;
         const h = getHeight(x, z);
         pos.setY(i, h);
         const c = getGroundColor(x, z, h);
         colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
+        computeSplat(x, z, h, getBiome(x, z), getSlope(x, z), sp4);
+        splats[i * 4] = sp4[0]; splats[i * 4 + 1] = sp4[1]; splats[i * 4 + 2] = sp4[2]; splats[i * 4 + 3] = sp4[3];
       }
       geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geo.setAttribute('splat', new THREE.BufferAttribute(splats, 4));
       geo.computeVertexNormals();
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.set(ox, 0, oz);

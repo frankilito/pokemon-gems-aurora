@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { G } from '../core/engine.js';
 import { getHeight, WORLD } from './terrain.js';
+import { makeHouse, makeGym, GLASS_POOL } from './buildingKit.js';
 
 const M = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: .9, ...o });
 
@@ -27,20 +28,7 @@ export class Landmarks {
   poi(x, z, r, name, type, data = {}) { this.interactables.push({ x, z, r, name, type, ...data }); }
 
   house(w = 4, d = 4.5, hgt = 2.6, wall = '#f5ead8', roof = '#e0705a') {
-    const g = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.BoxGeometry(w, hgt, d), M(wall));
-    body.position.y = hgt / 2;
-    const roofM = new THREE.Mesh(new THREE.ConeGeometry(Math.hypot(w, d) * .62, hgt * .75, 4), M(roof, { flatShading: true }));
-    roofM.position.y = hgt + hgt * .37;
-    roofM.rotation.y = Math.PI / 4;
-    const door = new THREE.Mesh(new THREE.BoxGeometry(.9, 1.5, .1), M('#7a5238'));
-    door.position.set(0, .75, d / 2 + .04);
-    const win1 = new THREE.Mesh(new THREE.BoxGeometry(.8, .7, .06), M('#bfe3ff', { emissive: '#3d5a80', emissiveIntensity: .4 }));
-    win1.position.set(-w / 4 - .2, 1.5, d / 2 + .04);
-    const win2 = win1.clone(); win2.position.x = w / 4 + .2;
-    g.add(body, roofM, door, win1, win2);
-    g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-    return g;
+    return makeHouse({ w, d, hgt, wall, roof });
   }
 
   buildTown() {
@@ -48,7 +36,7 @@ export class Landmarks {
     // 研究所(大)
     const lab = this.house(7, 5.5, 3.2, '#e8eef8', '#5a7ba6');
     const dish = new THREE.Mesh(new THREE.SphereGeometry(.9, 10, 8, 0, Math.PI * 2, 0, Math.PI / 2), M('#cfd8ea'));
-    dish.rotation.z = .8; dish.position.set(2.4, 4.4, 0);
+    dish.rotation.z = .8; dish.position.set(1.8, 6.9, 0);
     lab.add(dish);
     this.add(lab, T.x + 18, T.z - 22, 4.6);
     this.poi(T.x + 18, T.z - 18.5, 3, '青柏研究所', 'lab');
@@ -56,7 +44,7 @@ export class Landmarks {
     // 商店
     const shop = this.house(4.5, 4, 2.6, '#fdf3dd', '#4f9fd8');
     const sign = new THREE.Mesh(new THREE.BoxGeometry(2.4, .6, .12), M('#4f9fd8', { emissive: '#1f4f7d', emissiveIntensity: .5 }));
-    sign.position.set(0, 3, 2.1);
+    sign.position.set(0, 2.62, 2.42);
     shop.add(sign);
     this.add(shop, T.x - 16, T.z - 12, 3.6);
     this.poi(T.x - 16, T.z - 9, 2.8, '友好商店', 'shop');
@@ -64,7 +52,7 @@ export class Landmarks {
     // 宝可梦中心
     const pc = this.house(5, 4.5, 2.8, '#fff0f0', '#e8556a');
     const ball = new THREE.Mesh(new THREE.SphereGeometry(.5, 12, 10), M('#e8404f'));
-    ball.position.set(0, 3.6, 0);
+    ball.position.set(0, 5.72, 0);
     pc.add(ball);
     this.add(pc, T.x - 2, T.z + 20, 4);
     this.poi(T.x - 2, T.z + 16.8, 2.8, '宝可梦中心', 'heal');
@@ -101,18 +89,7 @@ export class Landmarks {
   }
 
   gymBuilding(color, icon) {
-    const g = new THREE.Group();
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(5.5, 6, 1, 8), M('#d8dde8'));
-    base.position.y = .5;
-    const hall = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 4.8, 3.4, 8), M('#eef1f8'));
-    hall.position.y = 2.7;
-    const roof = new THREE.Mesh(new THREE.ConeGeometry(5.2, 2.4, 8), M(color, { flatShading: true }));
-    roof.position.y = 5.6;
-    const gate = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.4, .5), M(color));
-    gate.position.set(0, 1.7, 4.6);
-    g.add(base, hall, roof, gate);
-    g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-    return g;
+    return makeGym(color);
   }
 
   buildGyms() {
@@ -208,6 +185,12 @@ export class Landmarks {
   }
 
   update(dt) {
+    // 夜晚窗户暖光
+    const night = G.sky?.uniforms?.uNight?.value ?? 0;
+    if (Math.abs(night - (this._lastNight ?? -1)) > .02) {
+      this._lastNight = night;
+      for (const m of GLASS_POOL) m.emissiveIntensity = night * 1.35;
+    }
     if (this.gemSpin) { this.gemSpin.rotation.y += dt; this.gemSpin.position.y = 2.2 + Math.sin(G.time * 1.4) * .12; }
     if (this.altarStone) this.altarStone.rotation.y += dt * .5;
     if (this.templeCrystal) {
